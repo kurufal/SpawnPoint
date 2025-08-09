@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  arch-steam:
+    build: ./arch-steam
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - steam_cache:/home/steam/Steam
+      - games_data:/games
+      - ./config:/config:ro
+
+  webui:
+    build: ./webui
+    ports:
+      - "40404:8080"
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles
+    volumes:
+      - ./config:/config:ro
+    depends_on:
+      - arch-steam
+
+volumes:
+  steam_cache:
+  games_data:

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SpawnPoint</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">SpawnPoint</div>
+    <div class="spacer"></div>
+    <button id="toggle-terminal" class="btn">Terminal</button>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2>Games</h2>
+      <div class="card">
+        <div class="row">
+          <div class="title">Palworld</div>
+          <div class="status badge badge-off">stopped</div>
+        </div>
+        <div class="desc">App ID 2394010</div>
+        <div class="row gap">
+          <button class="btn btn-small">Install</button>
+          <button class="btn btn-small">Start</button>
+          <button class="btn btn-small">Stop</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <div class="title">Enshrouded</div>
+          <div class="status badge badge-off">stopped</div>
+        </div>
+        <div class="desc">App ID 2279510</div>
+        <div class="row gap">
+          <button class="btn btn-small">Install</button>
+          <button class="btn btn-small">Start</button>
+          <button class="btn btn-small">Stop</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="content">
+      <h2>Overview</h2>
+      <div class="grid">
+        <div class="tile">
+          <div class="tile-title">Server Status</div>
+          <div class="muted">No servers running</div>
+        </div>
+        <div class="tile">
+          <div class="tile-title">Recent Activity</div>
+          <ul class="list">
+            <li>Welcome to SpawnPoint</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <aside id="terminal-pane" class="terminal collapsed">
+      <div class="terminal-header">
+        <div>Terminal</div>
+        <button id="close-terminal" class="btn btn-small">Close</button>
+      </div>
+      <div class="terminal-body">
+        <pre class="terminal-output">
+[placeholder] terminal output will appear here
+        </pre>
+      </div>
+    </aside>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

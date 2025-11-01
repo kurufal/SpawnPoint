@@ -11,6 +11,8 @@ from pathlib import Path
 import shutil
 import sys
 import asyncio.subprocess as asp
+import time
+import re
 
 # --- in-memory log buffer for exposing uvicorn/app logs to the UI ---
 class InMemoryLogHandler(logging.Handler):
@@ -79,16 +81,46 @@ _SERVERS_FILE.parent.mkdir(parents=True, exist_ok=True)
 _install_lock = asyncio.Lock()
 
 def _read_servers_file():
+    logger = logging.getLogger("spawnpoint")
     try:
         if not _SERVERS_FILE.exists():
             return []
+
+        # treat an empty file as equivalent to no servers
+        try:
+            if _SERVERS_FILE.stat().st_size == 0:
+                logger.info("Servers file is empty, initializing to []: %s", _SERVERS_FILE)
+                try:
+                    _SERVERS_FILE.write_text("[]", encoding="utf-8")
+                except Exception:
+                    logger.exception("Failed to write empty servers file: %s", _SERVERS_FILE)
+                return []
+        except OSError:
+            # stat/read issues — fall back to trying to open the file
+            pass
+
         with _SERVERS_FILE.open("r", encoding="utf-8") as fh:
-            data = json.load(fh)
+            try:
+                data = json.load(fh)
+            except json.JSONDecodeError as jde:
+                # Corrupt or invalid JSON — back up the file and reinitialize to an empty list.
+                try:
+                    bak = _SERVERS_FILE.with_name(_SERVERS_FILE.name + f".corrupt.{int(time.time())}")
+                    shutil.copy2(_SERVERS_FILE, bak)
+                    logger.warning("servers.json contains invalid JSON; backed up corrupt file to %s and reinitializing", bak)
+                except Exception:
+                    logger.warning("servers.json contains invalid JSON and backup failed: %s", jde)
+                try:
+                    _SERVERS_FILE.write_text("[]", encoding="utf-8")
+                except Exception:
+                    logger.exception("Failed to reinitialize servers file after JSON error: %s", _SERVERS_FILE)
+                return []
+
             if isinstance(data, list):
                 return data
             return []
     except Exception as e:
-        logging.getLogger("spawnpoint").exception("Failed to read servers file: %s", e)
+        logger.exception("Failed to read servers file: %s", e)
         return []
 
 def _write_servers_file(servers):
@@ -103,6 +135,24 @@ def _find_server(servers, appId):
         if str(s.get("appId")) == str(appId):
             return s
     return None
+
+
+def _sanitize_dirname(name: str) -> str | None:
+    """Return a filesystem-safe short name or None if the name is empty after sanitization.
+
+    Allows letters, numbers, dot, underscore and hyphen; replaces other chars with underscore.
+    Trims leading/trailing punctuation and limits length to 64 chars.
+    """
+    if not name:
+        return None
+    s = str(name).strip()
+    # replace sequences of disallowed chars with underscore
+    s = re.sub(r"[^A-Za-z0-9._-]+", "_", s)
+    # strip leading/trailing punctuation
+    s = s.strip("._-")
+    if not s:
+        return None
+    return s[:64]
 
 async def _run_steamcmd_install(appId: str, install_dir: Path):
     """
@@ -127,11 +177,15 @@ async def _run_steamcmd_install(appId: str, install_dir: Path):
         logger.info("Starting steamcmd install: %s", " ".join(cmd))
 
         # spawn the process and stream output to the logger
-        proc = await asp.create_subprocess_exec(
-            *cmd,
-            stdout=asp.PIPE,
-            stderr=asp.STDOUT
-        )
+        try:
+            proc = await asp.create_subprocess_exec(
+                *cmd,
+                stdout=asp.PIPE,
+                stderr=asp.STDOUT
+            )
+        except FileNotFoundError as fnf:
+            logger.error("steamcmd executable not found: %s. Make sure steamcmd is installed and in PATH.", fnf)
+            return
 
         # read lines as they arrive
         if proc.stdout:
@@ -228,12 +282,19 @@ async def api_add_server(payload: dict):
     # acquire the lock before launching the installer task
     await _install_lock.acquire()
 
-    # decide install dir (simple heuristic; adjust per your environment)
-    install_dir = _base_project / "games" / f"app_{appId}"
+    # allow an optional friendly name for the server directory (payload can include 'name')
+    name = payload.get("name") or payload.get("serverName") or payload.get("friendlyName")
+    dir_name = _sanitize_dirname(name) if name else None
+    if dir_name:
+        install_dir = _base_project / "games" / dir_name
+    else:
+        # fallback to the numeric app-based folder
+        install_dir = _base_project / "games" / f"app_{appId}"
+
     # schedule background task
     asyncio.create_task(_run_steamcmd_install(appId, install_dir))
 
-    return JSONResponse({"status": "started", "appId": appId, "installPath": str(install_dir)})
+    return JSONResponse({"status": "started", "appId": appId, "installPath": str(install_dir), "name": name or None})
 
 @app.get("/api/servers/{appId}/settings-files")
 async def api_settings_files(appId: str):
@@ -350,4 +411,4 @@ if __name__ == "__main__":
     import uvicorn
 
     # Run with uvicorn (ASGI). Port 8000 is conventional for uvicorn.
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run(app, host="127.0.0.1", port=40400, log_level="info")

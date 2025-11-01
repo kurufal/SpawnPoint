@@ -45,6 +45,7 @@ Thumbs.db
 # Game data (don’t push these)
 games/
 home/steam/Steam/
+top50.md
 
 # Docker/runtime
 *.pid

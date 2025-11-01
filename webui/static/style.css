@@ -1,0 +1,497 @@
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+}
+
+body {
+  background-color: #030712;
+  position: relative;
+  overflow: hidden;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Main Container */
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  gap: 0;
+  overflow: hidden;
+}
+
+.column-resizer {
+  width: 18px;
+  margin-right: -18px;
+  cursor: col-resize;
+  position: relative;
+  flex-shrink: 0;
+  align-self: stretch;
+  touch-action: none;
+  z-index: 3;
+  background: transparent;
+}
+
+.column-resizer.is-active {
+  cursor: col-resize;
+}
+
+.column-resizer[data-collapsed="true"] {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Left Column - Main Content */
+.left-column {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 0;
+}
+
+/* Header */
+.header {
+  font-family: 'Audiowide', cursive;
+  font-size: 48px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+}
+
+.header::before {
+  content: 'SpawnPoint';
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: 'Audiowide', cursive;
+  font-size: 48px;
+  font-weight: 700;
+  background: linear-gradient(180deg, #ec4899, #a855f7, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: blur(4px);
+  z-index: -1;
+  opacity: 0.8;
+}
+
+/* Card Grid */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+/* Game Card */
+.game-card {
+  position: relative;
+  background-color: #030712;
+  border: 1px solid #374151;
+  border-radius: 0;
+  overflow: visible;
+  width: 200px;
+  height: 255px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* Card Border Images */
+.card-border-top,
+.card-border-bottom {
+  position: absolute;
+  width: 100%;
+  height: 8px;
+  background-size: cover;
+  filter: blur(3px);
+  z-index: -1;
+  border-radius: 0;
+}
+
+.card-border-top {
+  top: -4px;
+  left: 0;
+  right: 0;
+}
+
+.card-border-bottom {
+  bottom: -4px;
+  left: 0;
+  right: 0;
+}
+
+/* Gear Icon */
+.gear-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.gear-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: #ffffff;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.gear-icon:hover svg {
+  opacity: 1;
+}
+
+/* Card Image */
+.card-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #030712;
+  z-index: 0;
+}
+
+/* Card Overlay Container */
+.card-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  z-index: 1;
+}
+
+/* Top Section - Game Title and IP */
+.card-top-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-self: flex-start;
+}
+
+.card-title {
+  font-family: 'Audiowide', cursive;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  letter-spacing: 0.5px;
+}
+
+.card-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+}
+
+/* Bottom Section - Status and Controls */
+.card-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-bottom-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.card-status-info {
+  flex: 1;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-version-info {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-control {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.card-control:hover {
+  background-color: rgba(0, 0, 0, 0.85);
+}
+
+/* Add Card - Plus Sign */
+.add-card {
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.add-card:hover {
+  opacity: 0.85;
+}
+
+.add-card .card-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-card .plus-icon {
+  font-size: 4rem;
+  color: #ffffff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.add-card .card-overlay {
+  pointer-events: none;
+}
+
+.add-card .card-control {
+  pointer-events: auto;
+}
+
+/* Right Column - Terminal */
+.right-column {
+  width: 400px;
+  min-width: 300px;
+  max-width: 800px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 2rem 2rem 0;
+  position: relative;
+  transition: width 0.3s ease;
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+.right-column.collapsed {
+  width: 60px;
+  min-width: 60px;
+  padding: 2rem 1rem;
+  resize: none;
+}
+
+/* Glow Border */
+.right-column::before {
+  content: '';
+  position: absolute;
+  top: 2rem;
+  left: 0;
+  width: 4px;
+  height: calc(100% - 4rem);
+  background: linear-gradient(180deg, #ec4899, #a855f7, #3b82f6);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.4);
+  border-radius: 2px;
+}
+
+/* Terminal Header */
+.terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.right-column.collapsed .terminal-header {
+  flex-direction: column;
+  padding-left: 0;
+}
+
+.terminal-toggle {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  transition: transform 0.3s;
+}
+
+.terminal-toggle:hover {
+  color: #a855f7;
+}
+
+.right-column.collapsed .terminal-toggle {
+  transform: none;
+}
+
+.terminal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.right-column.collapsed .terminal-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.terminal-ip {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.right-column.collapsed .terminal-ip {
+  display: none;
+}
+
+/* Terminal Output Box */
+.terminal-output {
+  flex: 1;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0;
+  padding: 1rem;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  white-space: pre-wrap;
+  margin-left: 1.5rem;
+  aspect-ratio: 1 / 1;
+}
+
+.right-column.collapsed .terminal-output {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .column-resizer {
+    display: none;
+  }
+
+  .left-column {
+    flex: 1 1 auto;
+  }
+
+  .right-column {
+    width: 100%;
+    max-width: 100%;
+    height: 400px;
+    padding: 1rem;
+  }
+
+  .right-column::before {
+    width: calc(100% - 2rem);
+    height: 4px;
+    top: 0;
+    left: 1rem;
+  }
+
+  .terminal-output {
+    margin-left: 0;
+    aspect-ratio: auto;
+  }
+
+  .terminal-header {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    font-size: 32px;
+  }
+
+  .header::before {
+    font-size: 32px;
+  }
+
+  .column-resizer {
+    display: none;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

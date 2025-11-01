@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+env/
+venv/
+.venv/
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+.eggs/
+htmlcov/
+.tox/
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+.python-version
+
+# Virtualenv / env files
+.env
+*.local.*
+instance/
+
+# Node
+node_modules/
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Game data (don’t push these)
+games/
+home/steam/Steam/
+
+# Docker/runtime
+*.pid

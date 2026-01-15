@@ -1,18 +1,3 @@
-# Requirements for the SpawnPoint web UI container
-# Install into your virtualenv or use when building the container image.
-flask
-flask-socketio
-eventlet
-fastapi
-uvicorn
-jinja2
-# Useful for running Flask in production inside a container
-gunicorn
-# Optional: load environment variables from .env inside the container
+nicegui>=2.0.0
 python-dotenv
-flask
-flask-socketio
-eventlet
-fastapi
-uvicorn
-jinja2
+starlette

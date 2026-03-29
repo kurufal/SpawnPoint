@@ -1,0 +1,10 @@
+.git
+.env
+__pycache__
+*.pyc
+*.pyo
+.vscode
+.idea
+*.md
+!README.md
+games/

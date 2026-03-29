@@ -225,124 +225,285 @@ body {
   background: rgba(168, 85, 247, 0.3);
 }
 
-/* Right column - terminal */
-.right-column {
-  width: 400px;
-  min-width: 300px;
+/* Neon resizer glow is on #terminal-resizer — see below */
+
+/* ── Terminal Column ── */
+#terminal-column {
   max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  padding: 2rem 2rem 2rem 0;
-  position: relative;
-  height: 100vh;
+  min-width: 0;
+  transition: width 0.2s ease;
+  overflow: hidden;
+  background: #1f2937;
+}
+
+#terminal-column.resizing {
+  transition: none !important;
+}
+
+/* NiceGUI wrapper for the tab bar HTML */
+.terminal-tabs-wrapper,
+.terminal-tabs-wrapper > div {
   flex-shrink: 0;
-  transition: width 0.3s;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.right-column.collapsed {
-  width: 60px;
-  min-width: 60px;
-  padding: 2rem 1rem;
-}
-
-/* Terminal glow border */
-.right-column::before {
-  content: '';
-  position: absolute;
-  top: 2rem;
-  left: 0;
-  width: 4px;
-  height: calc(100% - 4rem);
-  background: linear-gradient(180deg, #ec4899, #a855f7, #3b82f6);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
-  border-radius: 2px;
-}
-
-/* Terminal header */
-.terminal-header {
+/* ── Tab bar (contains tabs + collapse toggle) ── */
+.terminal-tab-bar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  padding-left: 1.5rem;
+  gap: 4px;
+  padding: 0.4rem 0.6rem;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid #374151;
+  background: #1a2332;
 }
 
-.terminal-toggle {
-  background: transparent !important;
-  border: none;
-  color: #fff;
-  font-size: 1.25rem;
+.terminal-tab-bar::-webkit-scrollbar { display: none; }
+
+.terminal-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  color: #6b7280;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
   cursor: pointer;
-  padding: 0.25rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.15s, color 0.15s;
 }
 
-.terminal-toggle:hover {
-  color: #a855f7;
-}
-
-.terminal-title {
-  font-family: 'Audiowide', cursive;
-  font-size: 1rem;
-  color: #fff;
-}
-
-.terminal-ip {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-left: auto;
-}
-
-.right-column.collapsed .terminal-title,
-.right-column.collapsed .terminal-ip {
-  display: none;
-}
-
-/* Terminal output - NiceGUI log */
-.terminal-output {
-  flex: 1;
-  background: #1f2937;
-  border: 1px solid #374151;
-  padding: 1rem;
-  margin-left: 1.5rem;
-  font-family: 'Courier New', monospace;
-  font-size: 0.75rem;
+.terminal-tab:hover {
   color: #d1d5db;
-  overflow-y: auto;
-  min-height: 0;
+  background: rgba(31, 41, 55, 0.6);
 }
 
-.right-column.collapsed .terminal-output {
+.terminal-tab.active {
+  background: #1f2937;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+.terminal-tab-close {
+  font-size: 0.7rem;
+  opacity: 0.4;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.terminal-tab-close:hover {
+  opacity: 1;
+  color: #ef4444;
+}
+
+/* Collapse toggle (inside tab-bar, pushed right via flex spacer) */
+.terminal-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.terminal-toggle-btn:hover {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.15);
+}
+
+/* ── Tab panels ── */
+.terminal-tab-panel {
   display: none;
+  width: 100%;
+  height: 100%;
 }
 
-/* NiceGUI log component - fills container, no horizontal scroll */
+.terminal-tab-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content area (fills remaining height) */
+.terminal-content {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  width: 100%;
+}
+
+/* Log component */
 .nicegui-log,
 .terminal-log {
   background: #1f2937 !important;
-  border: 1px solid #374151 !important;
+  border: none !important;
   color: #d1d5db !important;
   font-family: 'Courier New', monospace !important;
   font-size: 0.75rem !important;
   width: 100% !important;
   height: 100% !important;
-  padding: 1rem !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  word-wrap: break-word !important;
-  word-break: break-word !important;
-  white-space: pre-wrap !important;
+  max-width: 100% !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
 }
 
-/* Terminal column - ensure it's on the right and resizable */
-#terminal-column {
-  min-width: 200px;
-  max-width: 800px;
+/* q-scroll-area internals: force wrapping */
+.terminal-log .q-scrollarea__container {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+}
+
+.terminal-log .q-scrollarea__content {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0.75rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Each log line (NiceGUI Label inside the log) */
+.terminal-log .q-scrollarea__content > div {
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.terminal-log * {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.terminal-content > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+/* ── Collapsed state ── */
+#terminal-column.collapsed {
+  width: 36px !important;
+  min-width: 36px !important;
+}
+
+/* Hide the left panel (tabs + log) when collapsed */
+#terminal-column.collapsed #terminal-left {
+  display: none !important;
+}
+
+/* Title column stays visible, removes border in collapsed mode */
+#terminal-column.collapsed .terminal-title-col {
+  border-left: none;
+}
+
+/* ── Neon resizer ── */
+#terminal-resizer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -10px;
+  right: -10px;
+  bottom: 0;
+  z-index: 51;
+  cursor: col-resize;
+}
+
+#terminal-resizer:hover {
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.9), 0 0 50px rgba(168, 85, 247, 0.4);
+}
+
+#terminal-resizer[data-collapsed="true"] {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.3;
+}
+
+#terminal-resizer[data-collapsed="true"]::before {
+  display: none;
 }
 
 /* Dialog/Modal styling */
 .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Force modal card body to fill width */
+.q-dialog .q-card {
+  padding: 0 !important;
+}
+
+.q-dialog .q-card > div {
+  width: 100% !important;
+}
+
+/* NiceGUI input fields inside modals - full width */
+.q-dialog .q-field {
+  width: 100% !important;
+  padding-top: 0.5rem !important;
+}
+
+.q-dialog .q-field .q-field__control {
+  width: 100% !important;
+}
+
+.q-dialog .q-field .q-field__control-container {
+  width: 100% !important;
+}
+
+.q-dialog .q-field .q-field__native,
+.q-dialog .q-field .q-field__input {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.q-dialog .q-field__inner {
+  width: 100% !important;
+}
+
+.q-dialog .nicegui-input,
+.q-dialog .nicegui-input > .q-field {
+  width: 100% !important;
+}
+
+/* Ensure NiceGUI columns/rows fill dialog card width */
+.q-dialog .nicegui-column,
+.q-dialog .nicegui-row {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Hidden upload component (triggered from Change Image button) */
+.q-dialog .q-uploader {
+  pointer-events: none;
+}
+
+/* Separator line style for modal sections */
+.modal-section-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #64748b;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
 }
 
 .modal-header {
@@ -405,11 +566,12 @@ body {
   box-shadow: none !important;
 }
 
-/* NiceGUI input styling */
+/* NiceGUI input styling — outlined dense (no floating label) */
 .q-field--dark .q-field__control {
   background: rgba(0, 0, 0, 0.3) !important;
   border: 1px solid rgba(0, 255, 255, 0.3) !important;
   border-radius: 4px !important;
+  padding: 0 12px !important;
 }
 
 .q-field--dark .q-field__native,
@@ -419,6 +581,13 @@ body {
 
 .q-field--dark .q-field__label {
   color: #00ffff !important;
+}
+
+/* Form label above input */
+.form-label {
+  font-size: 0.8rem;
+  color: #00ffff;
+  margin-bottom: -0.25rem;
 }
 
 /* Status messages */
@@ -447,57 +616,7 @@ body {
   color: #ff4444;
 }
 
-/* Upload component */
-.q-uploader {
-  background: rgba(0, 0, 0, 0.3) !important;
-  border: 1px dashed rgba(0, 255, 255, 0.5) !important;
-  border-radius: 4px !important;
-  width: 100% !important;
-}
-
-/* Terminal column collapsed state */
-#terminal-column.collapsed {
-  width: 60px !important;
-  min-width: 60px !important;
-  padding: 2rem 1rem !important;
-  resize: none !important;
-}
-
-#terminal-column.collapsed .terminal-header {
-  flex-direction: column;
-  padding-left: 0;
-}
-
-#terminal-column.collapsed .terminal-title-text {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  font-size: 1rem;
-  margin-top: 1rem;
-}
-
-#terminal-column.collapsed .terminal-ip,
-#terminal-column.collapsed .terminal-content {
-  display: none !important;
-}
-
-/* Column resizer */
-#terminal-resizer {
-  cursor: col-resize;
-  transition: background 0.2s;
-}
-
-#terminal-resizer:hover {
-  background: rgba(168, 85, 247, 0.5);
-}
-
-#terminal-resizer:active {
-  background: rgba(168, 85, 247, 0.7);
-}
-
-#terminal-resizer[data-collapsed="true"] {
-  pointer-events: none;
-  cursor: default;
-}
+/* Upload component is hidden off-screen; no visual styling needed */
 
 /* Connection lost notification */
 .q-notification {

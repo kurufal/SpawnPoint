@@ -1,17 +1,26 @@
-version: "3.9"
-
 services:
   spawnpoint:
     build: .
     container_name: spawnpoint
     restart: unless-stopped
     ports:
-      - "40400:40400"
+      - "40400:40400"       # Web UI
+      - "8211:8211/udp"     # Example: Palworld
+      - "2456-2458:2456-2458/udp"  # Example: Valheim
+      # Add more game server ports as needed
     environment:
-      - STEAM_HOST=192.168.1.160
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
     volumes:
-      - steam_cache:/home/steam/Steam
-      - games_data:/home/steam/games
+      - ./SteamCMD:/opt/spawnpoint/SteamCMD    # Server configs (servers.json)
+      - steam_cache:/home/steam/Steam            # SteamCMD cache
+      - games_data:/opt/spawnpoint/games         # Installed game servers
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:40400')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 volumes:
   steam_cache:

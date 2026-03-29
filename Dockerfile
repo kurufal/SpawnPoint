@@ -1,6 +1,5 @@
 FROM cm2network/steamcmd:latest
 
-# Run as root so we can install Python + pip and build deps
 USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -13,24 +12,24 @@ RUN apt-get update \
 
 WORKDIR /opt/spawnpoint
 
-# Copy the repository into the image
-COPY . /opt/spawnpoint
-
-# Create and activate a virtualenv to avoid "externally managed environment" errors
-WORKDIR /opt/spawnpoint/webui
+# Install Python dependencies first (better layer caching)
+COPY webui/requirements.txt /opt/spawnpoint/webui/requirements.txt
 RUN python3 -m venv /opt/venv \
     && /opt/venv/bin/python -m pip install --upgrade pip setuptools wheel \
-    && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+    && /opt/venv/bin/pip install --no-cache-dir -r webui/requirements.txt
 
-# Make the venv binaries available in PATH for the runtime
+# Copy the rest of the project
+COPY . /opt/spawnpoint
+
 ENV PATH="/opt/venv/bin:${PATH}"
 
-# Ensure the project root is the working directory so imports work
-WORKDIR /opt/spawnpoint
+# Create directories for game data and config
+RUN mkdir -p /opt/spawnpoint/games /opt/spawnpoint/SteamCMD
 
-# Expose the web UI port (NiceGUI)
 EXPOSE 40400
 
-# Run the web UI using NiceGUI (built-in uvicorn server)
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=15s \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:40400')" || exit 1
+
 CMD ["python", "-m", "webui.app"]
 

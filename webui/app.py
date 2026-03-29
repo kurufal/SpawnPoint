@@ -5,7 +5,7 @@ Handles application startup, shutdown, and signal handling.
 
 import asyncio
 import logging
-import signal
+import socket
 import sys
 from pathlib import Path
 
@@ -16,48 +16,46 @@ sys.path.insert(0, str(Path(__file__).parent / "static" / "templates"))
 
 from spawnpoint import initialize, logger
 
+
 # ---------------------------------------------------------------------------
-# Shutdown Handling
+# Port Check
 # ---------------------------------------------------------------------------
 
-_shutdown_event = asyncio.Event()
-_is_shutting_down = False
-
-
-def handle_shutdown_signal(signum, frame):
-    """Handle shutdown signals gracefully."""
-    global _is_shutting_down
-    
-    if _is_shutting_down:
-        logger.warning("Forced shutdown requested")
-        sys.exit(1)
-    
-    _is_shutting_down = True
-    sig_name = signal.Signals(signum).name
-    logger.info("Received %s, initiating graceful shutdown...", sig_name)
-    
-    # Set shutdown event
+def stop_existing_instance(port: int = 40400):
+    """Stop an already-running instance listening on the given port."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        _shutdown_event.set()
-    except Exception:
-        pass
-    
-    # Allow NiceGUI to handle shutdown
-    logger.info("SpawnPoint shutting down gracefully")
-
-
-def setup_signal_handlers():
-    """Setup signal handlers for graceful shutdown."""
-    # Handle common shutdown signals
-    signal.signal(signal.SIGINT, handle_shutdown_signal)
-    signal.signal(signal.SIGTERM, handle_shutdown_signal)
-    
-    # Windows-specific
-    if sys.platform == 'win32':
-        try:
-            signal.signal(signal.SIGBREAK, handle_shutdown_signal)
-        except (AttributeError, ValueError):
-            pass
+        sock.settimeout(1)
+        result = sock.connect_ex(('127.0.0.1', port))
+        if result == 0:
+            logger.info("Port %d is in use — stopping existing instance...", port)
+            sock.close()
+            # Find and kill the process occupying the port
+            import subprocess
+            if sys.platform == 'win32':
+                out = subprocess.check_output(
+                    ['netstat', '-ano', '-p', 'TCP'], text=True
+                )
+                for line in out.splitlines():
+                    if f':{port}' in line and 'LISTENING' in line:
+                        pid = int(line.strip().split()[-1])
+                        logger.info("Killing PID %d on port %d", pid, port)
+                        subprocess.call(['taskkill', '/F', '/PID', str(pid)])
+                        break
+            else:
+                out = subprocess.check_output(
+                    ['lsof', '-ti', f'tcp:{port}'], text=True
+                )
+                for pid in out.strip().splitlines():
+                    logger.info("Killing PID %s on port %d", pid, port)
+                    subprocess.call(['kill', '-9', pid])
+            # Brief pause to let the OS release the port
+            import time
+            time.sleep(1)
+        else:
+            sock.close()
+    except Exception as exc:
+        logger.debug("Port check encountered an error: %s", exc)
 
 
 # ---------------------------------------------------------------------------
@@ -67,8 +65,8 @@ def setup_signal_handlers():
 def main():
     """Main entry point for SpawnPoint."""
     
-    # Setup signal handlers
-    setup_signal_handlers()
+    # Stop any already-running instance
+    stop_existing_instance(40400)
     
     # Initialize SpawnPoint
     logger.info("=" * 60)
@@ -80,15 +78,18 @@ def main():
     logger.info("Starting web interface on port 40400...")
     
     # Run NiceGUI
-    ui.run(
-        title='SpawnPoint',
-        host='0.0.0.0',
-        port=40400,
-        favicon='🎮',
-        dark=True,
-        reload=False,
-        show=False
-    )
+    try:
+        ui.run(
+            title='SpawnPoint',
+            host='0.0.0.0',
+            port=40400,
+            favicon='🎮',
+            dark=True,
+            reload=False,
+            show=False
+        )
+    except KeyboardInterrupt:
+        logger.info("SpawnPoint shut down.")
 
 
 if __name__ in {"__main__", "__mp_main__"}:
